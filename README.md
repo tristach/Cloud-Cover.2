@@ -14,6 +14,16 @@
 
 ---
 
+-Example query:
+// This query identifies top 5 brute force attacker IPs in the last 24 hours
+SecurityEvent
+| where EventID == 4625 and isnotempty(IpAddress)
+| where TimeGenerated > ago(1d)
+| summarize Count = count() by IpAddress
+| top 5 by Count
+| sort by Count desc
+
+
 ## 📊 **Example Output**
 
 ![Top 20 IPs](insert_screenshot_link_or_relative_path.png)
