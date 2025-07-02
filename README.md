@@ -26,7 +26,9 @@ SecurityEvent
 
 ## 📊 **Example Output**
 
-![Top 20 IPs](insert_screenshot_link_or_relative_path.png)
+<img width="620" alt="image" src="https://github.com/user-attachments/assets/30ee201b-9687-4e28-a507-16272bf061c4" />
+
+
 
 *Bar chart of top 20 IPs by failed login count — generated from Logic App CSV export.*
 
