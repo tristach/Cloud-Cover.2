@@ -1,4 +1,4 @@
-# Cloud-Cover: Azure Brute Automated Reporting Pipeline
+# Cloud-Cover.2: Automated Reporting Pipeline
 
 -Cloud-Cover is a prototype security automation solution built in Azure.  
 -It identifies (for example) brute force login attempts, extracts the top attacking IPs, and generates reports for further analysis.
