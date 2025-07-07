@@ -1,0 +1,109 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "triggers": {
+            "Recurrence": {
+                "recurrence": {
+                    "interval": 15,
+                    "frequency": "Minute",
+                    "timeZone": "Tokyo Standard Time"
+                },
+                "evaluatedRecurrence": {
+                    "interval": 15,
+                    "frequency": "Minute",
+                    "timeZone": "Tokyo Standard Time"
+                },
+                "type": "Recurrence"
+            }
+        },
+        "actions": {
+            "Run_query_and_list_results": {
+                "runAfter": {},
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azuremonitorlogs']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "body": "\n",
+                    "path": "/queryData",
+                    "queries": {
+                        "subscriptions": "86f30264-9ee4-4868-81ab-0864abd5916b",
+                        "resourcegroups": "RG-Cyber-Lab",
+                        "resourcetype": "Log Analytics Workspace",
+                        "resourcename": "LAW-Cyber-Lab",
+                        "timerange": "Last 60 days"
+                    }
+                }
+            },
+            "Create_CSV_table": {
+                "runAfter": {
+                    "Run_query_and_list_results": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Table",
+                "inputs": {
+                    "from": "@body('Run_query_and_list_results')?['value']",
+                    "format": "CSV"
+                }
+            },
+            "Send_an_email_(V2)": {
+                "runAfter": {
+                    "Create_CSV_table": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['office365']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "body": {
+                        "To": "nstach@rainboweigo.onmicrosoft.com",
+                        "Subject": "Cloud-Cover Export",
+                        "Body": "<p class=\"editor-paragraph\">Attached is the latest CSV export from Sentinel.<br>CloudCover.csv</p><br>",
+                        "Attachments": [
+                            {
+                                "Name": "CloudCover.csv",
+                                "ContentBytes": "@base64(body('Create_CSV_table'))"
+                            }
+                        ],
+                        "Importance": "Normal"
+                    },
+                    "path": "/v2/Mail"
+                }
+            }
+        },
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "type": "Object",
+                "defaultValue": {}
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "type": "Object",
+            "value": {
+                "azuremonitorlogs": {
+                    "id": "/subscriptions/86f30264-9ee4-4868-81ab-0864abd5916b/providers/Microsoft.Web/locations/eastus2/managedApis/azuremonitorlogs",
+                    "connectionId": "/subscriptions/86f30264-9ee4-4868-81ab-0864abd5916b/resourceGroups/RG-Cyber-Lab/providers/Microsoft.Web/connections/azuremonitorlogs",
+                    "connectionName": "azuremonitorlogs"
+                },
+                "office365": {
+                    "id": "/subscriptions/86f30264-9ee4-4868-81ab-0864abd5916b/providers/Microsoft.Web/locations/eastus2/managedApis/office365",
+                    "connectionId": "/subscriptions/86f30264-9ee4-4868-81ab-0864abd5916b/resourceGroups/RG-Cyber-Lab/providers/Microsoft.Web/connections/office365",
+                    "connectionName": "office365"
+                }
+            }
+        }
+    }
+}
